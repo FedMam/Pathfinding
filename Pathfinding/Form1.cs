@@ -115,7 +115,7 @@ namespace Pathfinding
 
         int Heuristic(Cell cell)
         {
-            if (heuristic2.Checked) return (cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY);
+            if (heuristic2.Checked) return ((cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY)) * 100;
             if (!diagCB.Checked) return (Math.Abs(cell.X - endX) + Math.Abs(cell.Y - endY)) * 100 + Math.Abs(Math.Abs(cell.X - endX) - Math.Abs(cell.Y - endY));
             return Math.Max(Math.Abs(cell.X - endX), Math.Abs(cell.Y - endY)) * 100;
         }
