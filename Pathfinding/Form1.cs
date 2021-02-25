@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
 
 namespace Pathfinding
 {
+    // Sources:
+    // https://www.redblobgames.com
+    // https://www.geeksforgeeks.org
+    // https://www.stackoverflow.com
+
     public partial class Form1 : Form
     {
-        int[,] field = new int[63, 45];
+        int[,] field = new int[150, 120];
         MouseHeldType mouseHeld = MouseHeldType.None;
-        int startX = 0, startY = 0, endX = 19, endY = 19;
+        int startX = 1, startY = 15, endX = 28, endY = 15;
         bool running = false;
         Algorithm algorithm = Algorithm.BFS;
         List<Cell> path = new List<Cell>();
@@ -20,13 +26,15 @@ namespace Pathfinding
         public Form1()
         {
             InitializeComponent();
-            for (int i = 0; i < 63; i++)
+            for (int i = 0; i < 150; i++)
             {
-                for (int j = 0; j < 45; j++)
+                for (int j = 0; j < 120; j++)
                 {
                     field[i, j] = 0;
                 }
             }
+            xSize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Width - 250) / 16 / 10 * 10, 150);
+            ySize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Height - 30) / 16 / 10 * 10, 120);
             Invalidate();
         }
 
@@ -41,7 +49,6 @@ namespace Pathfinding
             switch (algorithm)
             {
                 case Algorithm.DFS: current = OpenSet.GetLast(); break;
-                case Algorithm.BFS: current = OpenSet.GetFirst(); break;
                 default: current = OpenSet.Get(); break;
             }
             if (current.X == endX && current.Y == endY)
@@ -72,33 +79,34 @@ namespace Pathfinding
                     path.Add(new Cell(startX, startY));
                     return;
                 }
-                int new_cost = TotalCost[current] + ((Graph(next) == 2) ? (int)cost.Value : 1);
-                if ((!Previous.ContainsKey(next) || ((algorithm == Algorithm.Dijkstra || algorithm == Algorithm.AStar) && new_cost < TotalCost[next])) && !(field[next.X, next.Y] == 1))
+                int newCost = TotalCost[current] + ((Graph(next) == 2) ? (int)cost.Value : 1);
+                if (algorithm == Algorithm.BFS) newCost = TotalCost[current] + 1;
+                if ((!Previous.ContainsKey(next) || ((algorithm == Algorithm.Dijkstra || algorithm == Algorithm.AStar) && newCost < TotalCost[next])) && !(field[next.X, next.Y] == 1))
                 {
                     if (!Previous.ContainsKey(next))
                     {
-                        TotalCost.Add(next, new_cost);
+                        TotalCost.Add(next, newCost);
                         Previous.Add(next, current);
                     }
                     else
                     {
-                        TotalCost[next] = new_cost;
+                        TotalCost[next] = newCost;
                         Previous[next] = current;
                     }
                     switch (algorithm)
                     {
                         case Algorithm.BFS:
                         case Algorithm.DFS:
-                            OpenSet.Add(next, 0);
+                            OpenSet.Add(next, newCost);
                             break;
                         case Algorithm.Dijkstra:
-                            OpenSet.Add(next, new_cost);
+                            OpenSet.Add(next, newCost);
                             break;
                         case Algorithm.BestFirst:
                             OpenSet.Add(next, Heuristic(next));
                             break;
                         case Algorithm.AStar:
-                            OpenSet.Add(next, new_cost + Heuristic(next));
+                            OpenSet.Add(next, newCost * 100 + Heuristic(next));
                             break;
                     }
                 }
@@ -107,8 +115,9 @@ namespace Pathfinding
 
         int Heuristic(Cell cell)
         {
-            if (!diagCB.Checked) return Math.Abs(cell.X - endX) + Math.Abs(cell.Y - endY);
-            return Math.Max(Math.Abs(cell.X - endX), Math.Abs(cell.Y - endY));
+            if (heuristic2.Checked) return (cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY);
+            if (!diagCB.Checked) return (Math.Abs(cell.X - endX) + Math.Abs(cell.Y - endY)) * 100 + Math.Abs(Math.Abs(cell.X - endX) - Math.Abs(cell.Y - endY));
+            return Math.Max(Math.Abs(cell.X - endX), Math.Abs(cell.Y - endY)) * 100;
         }
 
         int Graph(Cell cell) => field[cell.X, cell.Y];
@@ -116,43 +125,26 @@ namespace Pathfinding
         Cell[] Neighbours(Cell cell)
         {
             List<Cell> res = new List<Cell>();
-            if (Math.Abs(cell.X - endX) > Math.Abs(cell.Y - endY))
+            if (cell.X < XSize - 1) res.Add(new Cell(cell.X + 1, cell.Y));
+            if (cell.X > 0) res.Add(new Cell(cell.X - 1, cell.Y));
+            if (diagCB.Checked)
             {
-                if (cell.Y > 0) res.Add(new Cell(cell.X, cell.Y - 1));
-                if (cell.Y < YSize - 1) res.Add(new Cell(cell.X, cell.Y + 1));
-                if (diagCB.Checked)
-                {
-                    if (cell.X > 0 && cell.Y > 0) res.Add(new Cell(cell.X - 1, cell.Y - 1));
-                    if (cell.X > 0 && cell.Y < YSize - 1) res.Add(new Cell(cell.X - 1, cell.Y + 1));
-                    if (cell.X < XSize - 1 && cell.Y > 0) res.Add(new Cell(cell.X + 1, cell.Y - 1));
-                    if (cell.X < XSize - 1 && cell.Y < YSize - 1) res.Add(new Cell(cell.X + 1, cell.Y + 1));
-                }
-                if (cell.X < XSize - 1) res.Add(new Cell(cell.X + 1, cell.Y));
-                if (cell.X > 0) res.Add(new Cell(cell.X - 1, cell.Y));
+                if (cell.X > 0 && cell.Y > 0) res.Add(new Cell(cell.X - 1, cell.Y - 1));
+                if (cell.X > 0 && cell.Y < YSize - 1) res.Add(new Cell(cell.X - 1, cell.Y + 1));
+                if (cell.X < XSize - 1 && cell.Y > 0) res.Add(new Cell(cell.X + 1, cell.Y - 1));
+                if (cell.X < XSize - 1 && cell.Y < YSize - 1) res.Add(new Cell(cell.X + 1, cell.Y + 1));
             }
-            else
-            {
-                if (cell.X < XSize - 1) res.Add(new Cell(cell.X + 1, cell.Y));
-                if (cell.X > 0) res.Add(new Cell(cell.X - 1, cell.Y));
-                if (diagCB.Checked)
-                {
-                    if (cell.X > 0 && cell.Y > 0) res.Add(new Cell(cell.X - 1, cell.Y - 1));
-                    if (cell.X > 0 && cell.Y < YSize - 1) res.Add(new Cell(cell.X - 1, cell.Y + 1));
-                    if (cell.X < XSize - 1 && cell.Y > 0) res.Add(new Cell(cell.X + 1, cell.Y - 1));
-                    if (cell.X < XSize - 1 && cell.Y < YSize - 1) res.Add(new Cell(cell.X + 1, cell.Y + 1));
-                }
-                if (cell.Y > 0) res.Add(new Cell(cell.X, cell.Y - 1));
-                if (cell.Y < YSize - 1) res.Add(new Cell(cell.X, cell.Y + 1));
-            }
+            if (cell.Y > 0) res.Add(new Cell(cell.X, cell.Y - 1));
+            if (cell.Y < YSize - 1) res.Add(new Cell(cell.X, cell.Y + 1));
             return res.ToArray();
         }
 
         private void xSize_ValueChanged(object sender, EventArgs e)
         {
             Width = 150 + 16 * ((int)xSize.Value + 1) + 100;
-            for (int i = 0; i < 63; i++)
+            for (int i = 0; i < 150; i++)
             {
-                for (int j = 0; j < 45; j++)
+                for (int j = 0; j < 120; j++)
                 {
                     if (i >= XSize || j >= YSize) field[i, j] = 0;
                 }
@@ -169,15 +161,27 @@ namespace Pathfinding
         private void ySize_ValueChanged(object sender, EventArgs e)
         {
             Height = 39 + 16 * ((int)ySize.Value);
-            for (int i = 0; i < 63; i++)
+            for (int i = 0; i < 150; i++)
             {
-                for (int j = 0; j < 45; j++)
+                for (int j = 0; j < 120; j++)
                 {
                     if (i >= XSize || j >= YSize) field[i, j] = 0;
                 }
             }
             if (startY >= YSize) startY = YSize - 1;
             if (endY >= YSize) endY = YSize - 1;
+            if (ySize.Value < 23)
+            {
+                heuristicPanel.Visible = false;
+                hL.Visible = false;
+                statsBox.Visible = false;
+            }
+            else
+            {
+                heuristicPanel.Visible = true;
+                hL.Visible = true;
+                statsBox.Visible = true;
+            }
             path.Clear();
             OpenSet = new PriorityQueue<Cell>();
             Previous.Clear();
@@ -190,9 +194,9 @@ namespace Pathfinding
             cost.Enabled = costCB.Checked;
             if (!costCB.Checked)
             {
-                for (int i = 0; i < 63; i++)
+                for (int i = 0; i < 150; i++)
                 {
-                    for (int j = 0; j < 45; j++)
+                    for (int j = 0; j < 120; j++)
                     {
                         if (field[i, j] == 2)
                             field[i, j] = 0;
@@ -203,6 +207,7 @@ namespace Pathfinding
             OpenSet = new PriorityQueue<Cell>();
             Previous.Clear();
             TotalCost.Clear();
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
             Invalidate();
         }
 
@@ -245,51 +250,40 @@ namespace Pathfinding
         {
             if (dfsRB.Checked)
                 algorithm = Algorithm.DFS;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void bfsRB_CheckedChanged(object sender, EventArgs e)
         {
             if (bfsRB.Checked)
                 algorithm = Algorithm.BFS;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void dijktraRB_CheckedChanged(object sender, EventArgs e)
         {
             if (dijkstraRB.Checked)
                 algorithm = Algorithm.Dijkstra;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void bestfirstRB_CheckedChanged(object sender, EventArgs e)
         {
             if (bestfirstRB.Checked)
                 algorithm = Algorithm.BestFirst;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void astarRB_CheckedChanged(object sender, EventArgs e)
         {
             if (astarRB.Checked)
                 algorithm = Algorithm.AStar;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void runButton_Click(object sender, EventArgs e)
         {
             if (running) { Reenable(); timer.Stop(); return; }
-            running = true;
-            runButton.Text = "Stop";
-            sizeLabel.Enabled = false;
-            xL.Enabled = false;
-            yL.Enabled = false;
-            xSize.Enabled = false;
-            ySize.Enabled = false;
-            cost.Enabled = false;
-            costCB.Enabled = false;
-            dfsRB.Enabled = false;
-            dijkstraRB.Enabled = false;
-            bfsRB.Enabled = false;
-            astarRB.Enabled = false;
-            bestfirstRB.Enabled = false;
-            showCB.Enabled = false;
-            diagCB.Enabled = false;
             path.Clear();
             OpenSet = new PriorityQueue<Cell>();
             Previous.Clear();
@@ -307,6 +301,27 @@ namespace Pathfinding
             }
             else
             {
+                running = true;
+                runButton.Text = "Stop";
+                sizeLabel.Enabled = false;
+                xL.Enabled = false;
+                yL.Enabled = false;
+                xSize.Enabled = false;
+                ySize.Enabled = false;
+                cost.Enabled = false;
+                costCB.Enabled = false;
+                dfsRB.Enabled = false;
+                dijkstraRB.Enabled = false;
+                bfsRB.Enabled = false;
+                astarRB.Enabled = false;
+                bestfirstRB.Enabled = false;
+                showCB.Enabled = false;
+                diagCB.Enabled = false;
+                themeButton.Enabled = false;
+                clearB.Enabled = false;
+                loadB.Enabled = false;
+                saveB.Enabled = false;
+                generateB.Enabled = false;
                 timer.Start();
             }
             Invalidate();
@@ -330,6 +345,11 @@ namespace Pathfinding
             bestfirstRB.Enabled = true;
             showCB.Enabled = true;
             diagCB.Enabled = true;
+            themeButton.Enabled = true;
+            clearB.Enabled = true;
+            loadB.Enabled = true;
+            saveB.Enabled = true;
+            generateB.Enabled = true;
             switch (algorithm)
             {
                 case Algorithm.DFS: labelA.Text = "DFS"; break;
@@ -395,11 +415,18 @@ namespace Pathfinding
             OpenSet = new PriorityQueue<Cell>();
             Previous.Clear();
             TotalCost.Clear();
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
             Invalidate();
         }
 
         private void diagCB_CheckedChanged(object sender, EventArgs e)
         {
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
+            if (diagCB.Checked)
+            {
+                heuristic1.Text = "Diagonal distance";
+            }
+            else heuristic1.Text = "Manhattan distance";
             path.Clear();
             OpenSet = new PriorityQueue<Cell>();
             Previous.Clear();
@@ -407,9 +434,116 @@ namespace Pathfinding
             Invalidate();
         }
 
+        private void saveB_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Text files (*.txt)|*.txt|All files|*.*";
+            sfd.InitialDirectory = Directory + "Maps";
+            sfd.ShowDialog();
+            using (StreamWriter file = File.CreateText(sfd.FileName))
+            {
+                try
+                {
+                    file.WriteLine(XSize);
+                    file.WriteLine(YSize);
+                    file.WriteLine(startX);
+                    file.WriteLine(startY);
+                    file.WriteLine(endX);
+                    file.WriteLine(endY);
+                    file.WriteLine(costCB.Checked ? "1" : "0");
+                    file.WriteLine(Cost);
+                    file.WriteLine(diagCB.Checked ? "1" : "0");
+                    for (int i = 0; i < XSize; i++)
+                    {
+                        for (int j = 0; j < YSize; j++)
+                        {
+                            file.Write(field[i, j]);
+                        }
+                        file.WriteLine();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Pathfinding", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    file.Close();
+                }
+            }
+        }
+
+        string Directory { get { return Environment.GetCommandLineArgs()[0].Replace(Path.GetFileName(Environment.GetCommandLineArgs()[0]), ""); } }
+        
+        private void loadB_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Text files (*.txt)|*.txt|All files|*.*";
+            ofd.InitialDirectory = Directory + "Maps";
+            ofd.ShowDialog();
+            using (StreamReader file = File.OpenText(ofd.FileName))
+            {
+                try
+                {
+                    xSize.Value = Convert.ToDecimal(file.ReadLine());
+                    ySize.Value = Convert.ToDecimal(file.ReadLine());
+                    startX = Convert.ToInt32(file.ReadLine());
+                    startY = Convert.ToInt32(file.ReadLine());
+                    endX = Convert.ToInt32(file.ReadLine());
+                    endY = Convert.ToInt32(file.ReadLine());
+                    if (file.ReadLine().ToCharArray()[0] == '1') costCB.Checked = true;
+                    else costCB.Checked = false;
+                    cost.Value = Convert.ToDecimal(file.ReadLine());
+                    if (file.ReadLine().ToCharArray()[0] == '1') diagCB.Checked = true;
+                    else diagCB.Checked = false;
+                    for (int i = 0; i < XSize; i++)
+                    {
+                        char[] row = file.ReadLine().ToCharArray();
+                        for (int j = 0; j < YSize; j++)
+                        {
+                            field[i, j] = row[j] - '0';
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Pathfinding", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    file.Close();
+                }
+            }
+        }
+
+        private void generateB_Click(object sender, EventArgs e)
+        {
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
+            GenerateForm gform = new GenerateForm();
+            gform.SetSize(XSize, YSize);
+            gform.ShowDialog();
+            if (gform.DialogResult == DialogResult.OK)
+            {
+                xSize.Value = gform.XS;
+                ySize.Value = gform.YS;
+                xSize_ValueChanged(this, new EventArgs());
+                ySize_ValueChanged(this, new EventArgs());
+                startX = gform.StartX;
+                startY = gform.StartY;
+                endX = gform.EndX;
+                endY = gform.EndY;
+                costCB.Checked = gform.Cost;
+                for (int i = 0; i < XSize; i++)
+                    for (int j = 0; j < YSize; j++)
+                        field[i, j] = gform.Field[i, j];
+            }
+            Invalidate();
+        }
+
         private void Form1_MouseMove(object sender, MouseEventArgs e)
         {
             if (running) return;
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
             if (mouseHeld == MouseHeldType.None) return;
             int x = (e.X - 150) / 16;
             int y = e.Y / 16;

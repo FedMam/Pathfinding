@@ -30,6 +30,10 @@
         {
             this.components = new System.ComponentModel.Container();
             this.toolbox = new System.Windows.Forms.Panel();
+            this.hL = new System.Windows.Forms.Label();
+            this.heuristicPanel = new System.Windows.Forms.Panel();
+            this.heuristic2 = new System.Windows.Forms.RadioButton();
+            this.heuristic1 = new System.Windows.Forms.RadioButton();
             this.diagCB = new System.Windows.Forms.CheckBox();
             this.astarRB = new System.Windows.Forms.RadioButton();
             this.costCB = new System.Windows.Forms.CheckBox();
@@ -60,6 +64,7 @@
             this.intervalLbl = new System.Windows.Forms.Label();
             this.intervalBar = new System.Windows.Forms.TrackBar();
             this.toolbox.SuspendLayout();
+            this.heuristicPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cost)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ySize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.xSize)).BeginInit();
@@ -74,6 +79,8 @@
             | System.Windows.Forms.AnchorStyles.Left)));
             this.toolbox.BackColor = System.Drawing.SystemColors.Control;
             this.toolbox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.toolbox.Controls.Add(this.hL);
+            this.toolbox.Controls.Add(this.heuristicPanel);
             this.toolbox.Controls.Add(this.diagCB);
             this.toolbox.Controls.Add(this.astarRB);
             this.toolbox.Controls.Add(this.costCB);
@@ -92,6 +99,48 @@
             this.toolbox.Name = "toolbox";
             this.toolbox.Size = new System.Drawing.Size(150, 480);
             this.toolbox.TabIndex = 0;
+            // 
+            // hL
+            // 
+            this.hL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.hL.AutoSize = true;
+            this.hL.Location = new System.Drawing.Point(8, 412);
+            this.hL.Name = "hL";
+            this.hL.Size = new System.Drawing.Size(48, 13);
+            this.hL.TabIndex = 16;
+            this.hL.Text = "Heuristic";
+            // 
+            // heuristicPanel
+            // 
+            this.heuristicPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.heuristicPanel.Controls.Add(this.heuristic2);
+            this.heuristicPanel.Controls.Add(this.heuristic1);
+            this.heuristicPanel.Location = new System.Drawing.Point(3, 418);
+            this.heuristicPanel.Name = "heuristicPanel";
+            this.heuristicPanel.Size = new System.Drawing.Size(140, 61);
+            this.heuristicPanel.TabIndex = 15;
+            // 
+            // heuristic2
+            // 
+            this.heuristic2.AutoSize = true;
+            this.heuristic2.Location = new System.Drawing.Point(10, 33);
+            this.heuristic2.Name = "heuristic2";
+            this.heuristic2.Size = new System.Drawing.Size(115, 17);
+            this.heuristic2.TabIndex = 1;
+            this.heuristic2.Text = "Euclidean distance";
+            this.heuristic2.UseVisualStyleBackColor = true;
+            // 
+            // heuristic1
+            // 
+            this.heuristic1.AutoSize = true;
+            this.heuristic1.Checked = true;
+            this.heuristic1.Location = new System.Drawing.Point(10, 10);
+            this.heuristic1.Name = "heuristic1";
+            this.heuristic1.Size = new System.Drawing.Size(119, 17);
+            this.heuristic1.TabIndex = 0;
+            this.heuristic1.TabStop = true;
+            this.heuristic1.Text = "Manhattan distance";
+            this.heuristic1.UseVisualStyleBackColor = true;
             // 
             // diagCB
             // 
@@ -335,6 +384,7 @@
             this.generateB.TabIndex = 21;
             this.generateB.Text = "Generate...";
             this.generateB.UseVisualStyleBackColor = true;
+            this.generateB.Click += new System.EventHandler(this.generateB_Click);
             // 
             // saveB
             // 
@@ -344,6 +394,7 @@
             this.saveB.TabIndex = 20;
             this.saveB.Text = "Save Map";
             this.saveB.UseVisualStyleBackColor = true;
+            this.saveB.Click += new System.EventHandler(this.saveB_Click);
             // 
             // loadB
             // 
@@ -353,6 +404,7 @@
             this.loadB.TabIndex = 19;
             this.loadB.Text = "Load Map";
             this.loadB.UseVisualStyleBackColor = true;
+            this.loadB.Click += new System.EventHandler(this.loadB_Click);
             // 
             // clearB
             // 
@@ -366,7 +418,7 @@
             // 
             // statsBox
             // 
-            this.statsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.statsBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.statsBox.Controls.Add(this.labelD);
             this.statsBox.Controls.Add(this.labelA);
             this.statsBox.Controls.Add(this.labelB);
@@ -449,6 +501,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Pathfinding Algorithms";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
@@ -457,6 +510,8 @@
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseUp);
             this.toolbox.ResumeLayout(false);
             this.toolbox.PerformLayout();
+            this.heuristicPanel.ResumeLayout(false);
+            this.heuristicPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cost)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ySize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.xSize)).EndInit();
@@ -501,6 +556,10 @@
         private System.Windows.Forms.Button saveB;
         private System.Windows.Forms.Button loadB;
         private System.Windows.Forms.Button clearB;
+        private System.Windows.Forms.Label hL;
+        private System.Windows.Forms.Panel heuristicPanel;
+        private System.Windows.Forms.RadioButton heuristic2;
+        private System.Windows.Forms.RadioButton heuristic1;
     }
 }
 
