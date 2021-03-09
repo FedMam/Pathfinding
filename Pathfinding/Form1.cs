@@ -41,8 +41,8 @@ namespace Pathfinding
             string directory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Resources");
             try
             {
-                startPoint = (Bitmap)Image.FromFile(Path.Combine(directory, "startpoint.png"));
-                endPoint = (Bitmap)Image.FromFile(Path.Combine(directory, "endpoint.png"));
+                startPoint = Properties.Resources.startpoint;
+                endPoint = Properties.Resources.endpoint;
                 startPoint.MakeTransparent(Color.White);
                 endPoint.MakeTransparent(Color.White);
             }
