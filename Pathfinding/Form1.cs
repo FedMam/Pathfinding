@@ -22,6 +22,9 @@ namespace Pathfinding
         PriorityQueue<Cell> OpenSet = new PriorityQueue<Cell>();
         Dictionary<Cell, Cell> Previous = new Dictionary<Cell, Cell>();
         Dictionary<Cell, int> TotalCost = new Dictionary<Cell, int>();
+        Bitmap startPoint, endPoint;
+        bool resourcesLoaded = true;
+        Color pathColor;
 
         public Form1()
         {
@@ -35,6 +38,22 @@ namespace Pathfinding
             }
             xSize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Width - 250) / 16 / 10 * 10, 150);
             ySize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Height - 30) / 16 / 10 * 10, 120);
+            string directory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Resources");
+            try
+            {
+                startPoint = (Bitmap)Image.FromFile(Path.Combine(directory, "startpoint.png"));
+                endPoint = (Bitmap)Image.FromFile(Path.Combine(directory, "endpoint.png"));
+                startPoint.MakeTransparent(Color.White);
+                endPoint.MakeTransparent(Color.White);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Pathfinding", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                resourcesLoaded = false;
+            }
+            Random rand = new Random();
+            rand.Next();
+            pathColor = (new Color[] { Color.LightGray, Color.Gold, Color.MediumAquamarine, Color.LightSkyBlue, Color.SteelBlue })[rand.Next(5)];
             Invalidate();
         }
 
@@ -115,8 +134,11 @@ namespace Pathfinding
 
         int Heuristic(Cell cell)
         {
-            if (heuristic2.Checked) return ((cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY)) * 100;
+            // Euclidean distance
+            if (heuristic2.Checked) return (int)(Math.Sqrt((cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY)) * 100);
+            // Manhattan distance that prefers diagonal moves
             if (!diagCB.Checked) return (Math.Abs(cell.X - endX) + Math.Abs(cell.Y - endY)) * 100 + Math.Abs(Math.Abs(cell.X - endX) - Math.Abs(cell.Y - endY));
+            // Diagonal distance
             return Math.Max(Math.Abs(cell.X - endX), Math.Abs(cell.Y - endY)) * 100;
         }
 
@@ -227,11 +249,20 @@ namespace Pathfinding
                     e.Graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(150 + i * 16, j * 16), new Size(16, 16)));
                 }
             }
-            e.Graphics.FillEllipse(Brushes.Blue, new Rectangle(new Point(150 + endX * 16, endY * 16), new Size(16, 16)));
-            e.Graphics.FillEllipse(Brushes.Red, new Rectangle(new Point(150 + startX * 16 + 2, startY * 16 + 2), new Size(12, 12)));
-            foreach (Cell cell in path)
+            for (int i = 1; i < path.Count; i++)
             {
-                e.Graphics.FillEllipse(Brushes.LightBlue, new Rectangle(new Point(150 + cell.X * 16 + 4, cell.Y * 16 + 4), new Size(8, 8)));
+                e.Graphics.DrawLine(new Pen(pathColor, 3), 150 + path[i].X * 16 + 7, path[i].Y * 16 + 7, 150 + path[i - 1].X * 16 + 7, path[i - 1].Y * 16 + 7);
+            }
+            if (path.Count > 0) e.Graphics.DrawLine(new Pen(pathColor, 3), 150 + path[0].X * 16 + 7, path[0].Y * 16 + 7, 150 + endX * 16 + 7, endY * 16 + 7);
+            if (!resourcesLoaded)
+            {
+                e.Graphics.FillEllipse(Brushes.Blue, new Rectangle(new Point(150 + endX * 16, endY * 16), new Size(16, 16)));
+                e.Graphics.FillEllipse(Brushes.Red, new Rectangle(new Point(150 + startX * 16 + 2, startY * 16 + 2), new Size(12, 12)));
+            }
+            else
+            {
+                e.Graphics.DrawImage(startPoint, new Point(150 + startX * 16, startY * 16));
+                e.Graphics.DrawImage(endPoint, new Point(150 + endX * 16, endY * 16));
             }
             if (showCB.Checked)
             {
@@ -438,8 +469,8 @@ namespace Pathfinding
         {
             SaveFileDialog sfd = new SaveFileDialog();
             sfd.Filter = "Text files (*.txt)|*.txt|All files|*.*";
-            sfd.InitialDirectory = Directory + "Maps";
-            sfd.ShowDialog();
+            sfd.InitialDirectory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Maps");
+            if (sfd.ShowDialog() == DialogResult.Cancel) return;
             using (StreamWriter file = File.CreateText(sfd.FileName))
             {
                 try
@@ -479,8 +510,8 @@ namespace Pathfinding
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Text files (*.txt)|*.txt|All files|*.*";
-            ofd.InitialDirectory = Directory + "Maps";
-            ofd.ShowDialog();
+            ofd.InitialDirectory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Maps");
+            if (ofd.ShowDialog() == DialogResult.Cancel) return;
             using (StreamReader file = File.OpenText(ofd.FileName))
             {
                 try
@@ -514,6 +545,11 @@ namespace Pathfinding
                     file.Close();
                 }
             }
+        }
+
+        private void cost_ValueChanged(object sender, EventArgs e)
+        {
+            if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
         private void generateB_Click(object sender, EventArgs e)

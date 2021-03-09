@@ -230,6 +230,7 @@
             0,
             0,
             0});
+            this.cost.ValueChanged += new System.EventHandler(this.cost_ValueChanged);
             // 
             // bfsRB
             // 
