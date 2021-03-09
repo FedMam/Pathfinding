@@ -249,6 +249,17 @@ namespace Pathfinding
                     e.Graphics.FillRectangle(new SolidBrush(color), new Rectangle(new Point(150 + i * 16, j * 16), new Size(16, 16)));
                 }
             }
+            if (showCB.Checked)
+            {
+                foreach (Cell cell in Previous.Keys)
+                {
+                    e.Graphics.DrawRectangle(Pens.Yellow, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
+                }
+                foreach (Cell cell in OpenSet.GetItems())
+                {
+                    e.Graphics.DrawRectangle(Pens.Red, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
+                }
+            }
             for (int i = 1; i < path.Count; i++)
             {
                 e.Graphics.DrawLine(new Pen(pathColor, 3), 150 + path[i].X * 16 + 7, path[i].Y * 16 + 7, 150 + path[i - 1].X * 16 + 7, path[i - 1].Y * 16 + 7);
@@ -263,17 +274,6 @@ namespace Pathfinding
             {
                 e.Graphics.DrawImage(startPoint, new Point(150 + startX * 16, startY * 16));
                 e.Graphics.DrawImage(endPoint, new Point(150 + endX * 16, endY * 16));
-            }
-            if (showCB.Checked)
-            {
-                foreach (Cell cell in Previous.Keys)
-                {
-                    e.Graphics.DrawRectangle(Pens.Yellow, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
-                }
-                foreach (Cell cell in OpenSet.GetItems())
-                {
-                    e.Graphics.DrawRectangle(Pens.Red, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
-                }
             }
         }
 
