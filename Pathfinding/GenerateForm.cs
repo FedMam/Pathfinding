@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Pathfinding
@@ -150,7 +145,7 @@ namespace Pathfinding
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
-                    num = Math.Max(XS, YS) / 4;
+                    num = rand.Next(10, Math.Max(XS, YS));
                     for (int i = 0; i < num * (Cost ? 1 : 2); i++)
                     {
                         int size = rand.Next(Math.Min(XS, YS) / 2);
@@ -197,7 +192,7 @@ namespace Pathfinding
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
-                    Field[0, 0] = Field[1, 0] = Field[0, 1] = Field[XS - 1, YS - 1] = Field[XS - 2, YS - 1] = Field[XS - 1, YS - 2] = Field[XS - 2, YS - 2] = 0;
+                    Field[0, 0] = Field[1, 0] = Field[0, 1] = Field[XS - 1, YS - 1] = Field[XS - 2, YS - 1] = Field[XS - 1, YS - 2] = 0;
                     int _X = (XS % 2 == 0) ? (XS / 2) : (XS / 2 + 1);
                     int _Y = (YS % 2 == 0) ? (YS / 2) : (YS / 2 + 1);
                     for (int i = 0; i < _X; i++)
@@ -229,13 +224,93 @@ namespace Pathfinding
                             }
                         }
                     }
+                    for (int i = 1; i < Math.Min(XS - 1, 148); i++)
+                    {
+                        for (int j = 1; j < Math.Min(YS - 1, 118); j++)
+                        {
+                            if (Field[i, j] == 1 && Field[i - 1, j] != 1 && Field[i + 1, j] != 1 && Field[i, j + 1] != 1 && Field[i, j - 1] != 1)
+                            {
+                                switch(rand.Next(4))
+                                {
+                                    case 0: Field[i - 1, j] = 1; break;
+                                    case 1: Field[i + 1, j] = 1; break;
+                                    case 2: Field[i, j - 1] = 1; break;
+                                    case 3: Field[i, j + 1] = 1; break;
+                                }
+                            }
+                        }
+                    }
                     StartX = 0;
                     StartY = 0;
                     EndX = XS - 1;
                     EndY = YS - 1;
                     break;
+                case 4:
+                    for (int i = 0; i < 150; i++)
+                        for (int j = 0; j < 120; j++)
+                        {
+                            if (i % 2 == 0 && j % 2 == 0)
+                                Field[i, j] = 0;
+                            else Field[i, j] = 1;
+                        }
+                    bool[,] closedSet = new bool[XS, YS];
+                    for (int i = 0; i < XS; i++)
+                        for (int j = 0; j < YS; j++)
+                            closedSet[i, j] = false;
+                    closedSet[0, 0] = true;
+                    RandomDFS(new Cell(0, 0), ref closedSet, ref rand);
+                    StartX = 0;
+                    StartY = 0;
+                    EndX = XS - ((XS % 2 == 0) ? 2 : 1);
+                    EndY = YS - ((YS % 2 == 0) ? 2 : 1);
+                    break;
+                case 5:
+
+                    break;
+                case 6:
+
+                    break;
             }
             Invalidate();
+        }
+
+        private void RandomDFS(Cell current, ref bool[,] closedSet, ref Random rand)
+        {
+            closedSet[current.X, current.Y] = true;
+            List<Cell> neighbours = new List<Cell>();
+            do
+            {
+                neighbours = new List<Cell>();
+                List<Cell> neighwalls = new List<Cell>();
+                if (current.X > 1 && !closedSet[current.X - 2, current.Y])
+                {
+                    neighbours.Add(new Cell(current.X - 2, current.Y));
+                    neighwalls.Add(new Cell(current.X - 1, current.Y));
+                }
+                if (current.Y > 1 && !closedSet[current.X, current.Y - 2])
+                {
+                    neighbours.Add(new Cell(current.X, current.Y - 2));
+                    neighwalls.Add(new Cell(current.X, current.Y - 1));
+                }
+                if (current.X < XS - 2 && !closedSet[current.X + 2, current.Y])
+                {
+                    neighbours.Add(new Cell(current.X + 2, current.Y));
+                    neighwalls.Add(new Cell(current.X + 1, current.Y));
+                }
+                if (current.Y < YS - 2 && !closedSet[current.X, current.Y + 2])
+                {
+                    neighbours.Add(new Cell(current.X, current.Y + 2));
+                    neighwalls.Add(new Cell(current.X, current.Y + 1));
+                }
+                int nid = rand.Next(neighbours.Count);
+                if (neighbours.Count == 0) break;
+                Field[neighwalls[nid].X, neighwalls[nid].Y] = (Cost && rand.Next(2) == 0) ? 2 : 0;
+                closedSet[neighbours[nid].X, neighbours[nid].Y] = true;
+                RandomDFS(neighbours[nid], ref closedSet, ref rand);
+                neighbours.RemoveAt(nid);
+                neighwalls.RemoveAt(nid);
+            }
+            while (neighbours.Count > 0);
         }
 
         private void xS_ValueChanged(object sender, EventArgs e)
@@ -246,6 +321,10 @@ namespace Pathfinding
                 for (int j = 0; j < 120; j++)
                     if (i > xS.Value || j > yS.Value)
                         Field[i, j] = 0;
+            if (StartX >= XS) StartX = XS - 1;
+            if (StartY >= YS) StartY = YS - 1;
+            if (EndX >= XS) EndX = XS - 1;
+            if (EndY >= XS) EndY = XS - 1;
             Invalidate();
         }
 

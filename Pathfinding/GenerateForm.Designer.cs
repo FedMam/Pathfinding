@@ -61,7 +61,8 @@ namespace Pathfinding
             "Dots",
             "Walls",
             "Islands",
-            "Maze"});
+            "Maze (algorithm 1)",
+            "Maze (algorithm 2)"});
             this.comboBox1.Location = new System.Drawing.Point(52, 12);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(287, 21);
