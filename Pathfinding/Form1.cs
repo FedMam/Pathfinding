@@ -586,6 +586,13 @@ namespace Pathfinding
             if (x >= XSize || y >= YSize || x < 0 || y < 0) return;
             if (mouseHeld == MouseHeldType.Start)
             {
+                if (showCB.Checked)
+                {
+                    path.Clear();
+                    OpenSet = new PriorityQueue<Cell>();
+                    Previous.Clear();
+                    TotalCost.Clear();
+                }
                 startX = x;
                 startY = y;
                 Invalidate();
@@ -593,6 +600,13 @@ namespace Pathfinding
             }
             if (mouseHeld == MouseHeldType.End)
             {
+                if (showCB.Checked)
+                {
+                    path.Clear();
+                    OpenSet = new PriorityQueue<Cell>();
+                    Previous.Clear();
+                    TotalCost.Clear();
+                }
                 endX = x;
                 endY = y;
                 Invalidate();

@@ -176,7 +176,7 @@ namespace Pathfinding
                         }
                     }
                     sx = rand.Next(XS); sy = rand.Next(YS); ex = rand.Next(XS); ey = rand.Next(YS);
-                    while (Field[sx, sy] != 0 || Field[ex, ey] != 0 || (sx == ex && sy == ey))
+                    while (Field[sx, sy] == 1 || Field[ex, ey] == 1 || (sx == ex && sy == ey))
                     {
                         sx = rand.Next(XS);
                         sy = rand.Next(YS);
@@ -189,6 +189,28 @@ namespace Pathfinding
                     EndY = ey;
                     break;
                 case 3:
+                case 6:
+                    for (int i = 0; i < 150; i++)
+                        for (int j = 0; j < 120; j++)
+                            Field[i, j] = 0;
+                    if (comboBox1.SelectedIndex == 3)
+                        Rooms(0, 0, XS - 1, YS - 1, rand.Next(3, Math.Min(XS, YS) / 4), 0, false, ref rand);
+                    else
+                        Rooms(0, 0, XS - 1, YS - 1, XS + YS, 0, false, ref rand);
+                    sx = rand.Next(XS); sy = rand.Next(YS); ex = rand.Next(XS); ey = rand.Next(YS);
+                    while (Field[sx, sy] == 1 || Field[ex, ey] == 1 || (sx == ex && sy == ey))
+                    {
+                        sx = rand.Next(XS);
+                        sy = rand.Next(YS);
+                        ex = rand.Next(XS);
+                        ey = rand.Next(YS);
+                    }
+                    StartX = sx;
+                    StartY = sy;
+                    EndX = ex;
+                    EndY = ey;
+                    break;
+                case 4:
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
@@ -245,7 +267,7 @@ namespace Pathfinding
                     EndX = XS - 1;
                     EndY = YS - 1;
                     break;
-                case 4:
+                case 5:
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                         {
@@ -264,14 +286,61 @@ namespace Pathfinding
                     EndX = XS - ((XS % 2 == 0) ? 2 : 1);
                     EndY = YS - ((YS % 2 == 0) ? 2 : 1);
                     break;
-                case 5:
-
-                    break;
-                case 6:
-
-                    break;
             }
             Invalidate();
+        }
+
+        private void Rooms(int minX, int minY, int maxX, int maxY, int depth, int hole, bool vertical, ref Random rand)
+        {
+            if (depth < 1) return;
+            if ((vertical && maxY - minY <= 1) || (!vertical && maxX - minX <= 1) || (maxX <= minX) || (maxY <= minY)) return;
+            int pos = -1;
+            int new_hole;
+            int diff;
+            if (vertical)
+            {
+                diff = (int)Math.Round((double)(maxY - minY) / 3);
+                pos = rand.Next(minY + diff, maxY - diff);
+                int ctr = 0;
+                while (pos == hole && ctr < 10)
+                {
+                    pos = rand.Next(minY + diff, maxY - diff);
+                    ctr++;
+                }
+                new_hole = rand.Next(minX, maxX);
+                for (int i = minX; i <= maxX; i++)
+                {
+                    if (i == new_hole)
+                    {
+                        if (Cost) Field[new_hole, pos] = 2;
+                    }
+                    else Field[i, pos] = 1;
+                }
+                Rooms(minX, minY, maxX, pos - 1, depth - 1, new_hole, !vertical, ref rand);
+                Rooms(minX, pos + 1, maxX, maxY, depth - 1, new_hole, !vertical, ref rand);
+            }
+            else
+            {
+                diff = (int)Math.Round((double)(maxX - minX) / 3);
+                pos = rand.Next(minX + diff, maxX - diff);
+                int ctr = 0;
+                while (pos == hole && ctr < 10)
+                {
+                    pos = rand.Next(minX + diff, maxX - diff);
+                    ctr++;
+                }
+                new_hole = rand.Next(minY, maxY);
+                for (int i = minY; i <= maxY; i++)
+                {
+                    if (i == new_hole)
+                    {
+                        if (Cost) Field[pos, new_hole] = 2;
+                    }
+                    else Field[pos, i] = 1;
+                }
+                Rooms(minX, minY, pos - 1, maxY, depth - 1, new_hole, !vertical, ref rand);
+                Rooms(pos + 1, minY, maxX, maxY, depth - 1, new_hole, !vertical, ref rand);
+            }
         }
 
         private void RandomDFS(Cell current, ref bool[,] closedSet, ref Random rand)
