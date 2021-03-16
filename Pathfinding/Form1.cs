@@ -22,9 +22,12 @@ namespace Pathfinding
         PriorityQueue<Cell> OpenSet = new PriorityQueue<Cell>();
         Dictionary<Cell, Cell> Previous = new Dictionary<Cell, Cell>();
         Dictionary<Cell, int> TotalCost = new Dictionary<Cell, int>();
-        Bitmap startPoint, endPoint;
         bool resourcesLoaded = true;
         Color pathColor;
+        // Empty, Wall, High Cost, Path, Closed Set, Open Set
+        Color[,] themes = { { Color.White, Color.DarkGray, Color.LightGreen, Color.LightGray, Color.Yellow, Color.Red }};
+        // Wall, High Cost, Start, End
+        Bitmap[] themeImages = { Properties.Resources.startpoint, Properties.Resources.endpoint };
 
         public Form1()
         {
@@ -39,17 +42,9 @@ namespace Pathfinding
             xSize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Width - 250) / 16 / 10 * 10, 150);
             ySize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Height - 30) / 16 / 10 * 10, 120);
             string directory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Resources");
-            try
+            foreach (Bitmap image in themeImages)
             {
-                startPoint = Properties.Resources.startpoint;
-                endPoint = Properties.Resources.endpoint;
-                startPoint.MakeTransparent(Color.White);
-                endPoint.MakeTransparent(Color.White);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Pathfinding", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                resourcesLoaded = false;
+                if (image != null) image.MakeTransparent(Color.White);
             }
             Random rand = new Random();
             rand.Next();
@@ -253,11 +248,11 @@ namespace Pathfinding
             {
                 foreach (Cell cell in Previous.Keys)
                 {
-                    e.Graphics.DrawRectangle(Pens.Yellow, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
+                    e.Graphics.DrawRectangle(new Pen(Color.Yellow), new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
                 }
                 foreach (Cell cell in OpenSet.GetItems())
                 {
-                    e.Graphics.DrawRectangle(Pens.Red, new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
+                    e.Graphics.DrawRectangle(new Pen(Color.Red), new Rectangle(new Point(150 + cell.X * 16, cell.Y * 16), new Size(16, 16)));
                 }
             }
             for (int i = 1; i < path.Count; i++)
@@ -272,8 +267,8 @@ namespace Pathfinding
             }
             else
             {
-                e.Graphics.DrawImage(startPoint, new Point(150 + startX * 16, startY * 16));
-                e.Graphics.DrawImage(endPoint, new Point(150 + endX * 16, endY * 16));
+                e.Graphics.DrawImage(themeImages[0], new Point(150 + startX * 16, startY * 16));
+                e.Graphics.DrawImage(themeImages[1], new Point(150 + endX * 16, endY * 16));
             }
         }
 
@@ -348,7 +343,6 @@ namespace Pathfinding
                 bestfirstRB.Enabled = false;
                 showCB.Enabled = false;
                 diagCB.Enabled = false;
-                themeButton.Enabled = false;
                 clearB.Enabled = false;
                 loadB.Enabled = false;
                 saveB.Enabled = false;
@@ -376,7 +370,6 @@ namespace Pathfinding
             bestfirstRB.Enabled = true;
             showCB.Enabled = true;
             diagCB.Enabled = true;
-            themeButton.Enabled = true;
             clearB.Enabled = true;
             loadB.Enabled = true;
             saveB.Enabled = true;

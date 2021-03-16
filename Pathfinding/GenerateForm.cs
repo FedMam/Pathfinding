@@ -189,28 +189,6 @@ namespace Pathfinding
                     EndY = ey;
                     break;
                 case 3:
-                case 6:
-                    for (int i = 0; i < 150; i++)
-                        for (int j = 0; j < 120; j++)
-                            Field[i, j] = 0;
-                    if (comboBox1.SelectedIndex == 3)
-                        Rooms(0, 0, XS - 1, YS - 1, rand.Next(3, Math.Min(XS, YS) / 4), 0, false, ref rand);
-                    else
-                        Rooms(0, 0, XS - 1, YS - 1, XS + YS, 0, false, ref rand);
-                    sx = rand.Next(XS); sy = rand.Next(YS); ex = rand.Next(XS); ey = rand.Next(YS);
-                    while (Field[sx, sy] == 1 || Field[ex, ey] == 1 || (sx == ex && sy == ey))
-                    {
-                        sx = rand.Next(XS);
-                        sy = rand.Next(YS);
-                        ex = rand.Next(XS);
-                        ey = rand.Next(YS);
-                    }
-                    StartX = sx;
-                    StartY = sy;
-                    EndX = ex;
-                    EndY = ey;
-                    break;
-                case 4:
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
@@ -267,7 +245,7 @@ namespace Pathfinding
                     EndX = XS - 1;
                     EndY = YS - 1;
                     break;
-                case 5:
+                case 4:
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                         {
