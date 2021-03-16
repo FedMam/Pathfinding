@@ -48,7 +48,6 @@
             this.xSize = new System.Windows.Forms.NumericUpDown();
             this.sizeLabel = new System.Windows.Forms.Label();
             this.runButton = new System.Windows.Forms.Button();
-            this.themeButton = new System.Windows.Forms.Button();
             this.showCB = new System.Windows.Forms.CheckBox();
             this.timer = new System.Windows.Forms.Timer(this.components);
             this.controlPanel = new System.Windows.Forms.Panel();
@@ -328,16 +327,6 @@
             this.runButton.UseVisualStyleBackColor = true;
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
-            // themeButton
-            // 
-            this.themeButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.themeButton.Location = new System.Drawing.Point(11, 11);
-            this.themeButton.Name = "themeButton";
-            this.themeButton.Size = new System.Drawing.Size(75, 39);
-            this.themeButton.TabIndex = 14;
-            this.themeButton.Text = "Change Theme";
-            this.themeButton.UseVisualStyleBackColor = true;
-            // 
             // showCB
             // 
             this.showCB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -370,7 +359,6 @@
             this.controlPanel.Controls.Add(this.statsBox);
             this.controlPanel.Controls.Add(this.intervalLbl);
             this.controlPanel.Controls.Add(this.intervalBar);
-            this.controlPanel.Controls.Add(this.themeButton);
             this.controlPanel.Controls.Add(this.showCB);
             this.controlPanel.Location = new System.Drawing.Point(630, 0);
             this.controlPanel.Name = "controlPanel";
@@ -379,7 +367,7 @@
             // 
             // generateB
             // 
-            this.generateB.Location = new System.Drawing.Point(12, 143);
+            this.generateB.Location = new System.Drawing.Point(12, 98);
             this.generateB.Name = "generateB";
             this.generateB.Size = new System.Drawing.Size(75, 23);
             this.generateB.TabIndex = 21;
@@ -389,7 +377,7 @@
             // 
             // saveB
             // 
-            this.saveB.Location = new System.Drawing.Point(12, 114);
+            this.saveB.Location = new System.Drawing.Point(12, 69);
             this.saveB.Name = "saveB";
             this.saveB.Size = new System.Drawing.Size(75, 23);
             this.saveB.TabIndex = 20;
@@ -399,7 +387,7 @@
             // 
             // loadB
             // 
-            this.loadB.Location = new System.Drawing.Point(11, 85);
+            this.loadB.Location = new System.Drawing.Point(11, 40);
             this.loadB.Name = "loadB";
             this.loadB.Size = new System.Drawing.Size(75, 23);
             this.loadB.TabIndex = 19;
@@ -409,7 +397,7 @@
             // 
             // clearB
             // 
-            this.clearB.Location = new System.Drawing.Point(11, 56);
+            this.clearB.Location = new System.Drawing.Point(11, 11);
             this.clearB.Name = "clearB";
             this.clearB.Size = new System.Drawing.Size(75, 23);
             this.clearB.TabIndex = 18;
@@ -531,7 +519,6 @@
         private System.Windows.Forms.RadioButton astarRB;
         private System.Windows.Forms.CheckBox costCB;
         private System.Windows.Forms.RadioButton bestfirstRB;
-        private System.Windows.Forms.Button themeButton;
         private System.Windows.Forms.RadioButton dfsRB;
         private System.Windows.Forms.RadioButton dijkstraRB;
         private System.Windows.Forms.NumericUpDown cost;

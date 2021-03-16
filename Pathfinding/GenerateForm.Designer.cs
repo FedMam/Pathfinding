@@ -48,9 +48,9 @@ namespace Pathfinding
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(34, 13);
+            this.label1.Size = new System.Drawing.Size(54, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "Type:";
+            this.label1.Text = "Template:";
             // 
             // comboBox1
             // 
@@ -61,13 +61,11 @@ namespace Pathfinding
             "Dots",
             "Walls",
             "Islands",
-            "Rooms",
             "Standard Maze",
-            "Tree Maze",
-            "Diagonal Maze"});
-            this.comboBox1.Location = new System.Drawing.Point(52, 12);
+            "Tree Maze"});
+            this.comboBox1.Location = new System.Drawing.Point(72, 12);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(287, 21);
+            this.comboBox1.Size = new System.Drawing.Size(267, 21);
             this.comboBox1.TabIndex = 1;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
