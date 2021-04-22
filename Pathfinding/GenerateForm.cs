@@ -30,7 +30,6 @@ namespace Pathfinding
         public int XS { get { return (int)xS.Value; } }
         public int YS { get { return (int)yS.Value; } }
         public bool Cost { get { return cost.Checked; } }
-
         public int[,] Field { get; set; }
         public int StartX { get; set; }
         public int StartY { get; set; }
@@ -39,7 +38,7 @@ namespace Pathfinding
 
         private void GenerateForm_Paint(object sender, PaintEventArgs e)
         {
-            // 12, 39, 8x8
+            // Preview the map.
             for (int i = 0; i < xS.Value; i++)
                 for (int j = 0; j < yS.Value; j++)
                 {
@@ -69,6 +68,7 @@ namespace Pathfinding
             Generate();
         }
 
+        // A random map is generated using five different algorithms.
         private void Generate()
         {
             for (int i = 0; i < 150; i++)
@@ -78,6 +78,7 @@ namespace Pathfinding
             switch (comboBox1.SelectedIndex)
             {
                 case 0:
+                    // Dots: Randomly places some wall cells or higher cost cells on a blank map.
                     for (int i = 0; i < Math.Max(xS.Value, yS.Value) * (cost.Checked ? 10 : 5); i++)
                     {
                         int x = rand.Next((int)xS.Value);
@@ -100,6 +101,7 @@ namespace Pathfinding
                     EndY = ey;
                     break;
                 case 1:
+                    // Walls: Places some random horizontal and vertical walls along the map.
                     int num = rand.Next(Math.Max(XS, YS), Math.Max(XS, YS));
                     if (Cost)
                     {
@@ -142,6 +144,7 @@ namespace Pathfinding
                     EndY = ey;
                     break;
                 case 2:
+                    // Islands: Starts with a map filled with wall cells and generates squares of passage cells on it.
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
@@ -189,6 +192,9 @@ namespace Pathfinding
                     EndY = ey;
                     break;
                 case 3:
+                    // Standard Maze: Generates an imperfect maze with loops, impassable walls, etc.
+                    // It does not guarantee that a path from start to end exists.
+                    // You may want to edit it so that it has a path.
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                             Field[i, j] = 1;
@@ -246,6 +252,9 @@ namespace Pathfinding
                     EndY = YS - 1;
                     break;
                 case 4:
+                    // Tree Maze: Generates a perfect maze using Random Depth First Search algorithm.
+                    // In a perfect maze, any passage cell has a unique path to any other passage cell
+                    // (if we don't count paths that return on already visited cells).
                     for (int i = 0; i < 150; i++)
                         for (int j = 0; j < 120; j++)
                         {
@@ -268,59 +277,7 @@ namespace Pathfinding
             Invalidate();
         }
 
-        private void Rooms(int minX, int minY, int maxX, int maxY, int depth, int hole, bool vertical, ref Random rand)
-        {
-            if (depth < 1) return;
-            if ((vertical && maxY - minY <= 1) || (!vertical && maxX - minX <= 1) || (maxX <= minX) || (maxY <= minY)) return;
-            int pos = -1;
-            int new_hole;
-            int diff;
-            if (vertical)
-            {
-                diff = (int)Math.Round((double)(maxY - minY) / 3);
-                pos = rand.Next(minY + diff, maxY - diff);
-                int ctr = 0;
-                while (pos == hole && ctr < 10)
-                {
-                    pos = rand.Next(minY + diff, maxY - diff);
-                    ctr++;
-                }
-                new_hole = rand.Next(minX, maxX);
-                for (int i = minX; i <= maxX; i++)
-                {
-                    if (i == new_hole)
-                    {
-                        if (Cost) Field[new_hole, pos] = 2;
-                    }
-                    else Field[i, pos] = 1;
-                }
-                Rooms(minX, minY, maxX, pos - 1, depth - 1, new_hole, !vertical, ref rand);
-                Rooms(minX, pos + 1, maxX, maxY, depth - 1, new_hole, !vertical, ref rand);
-            }
-            else
-            {
-                diff = (int)Math.Round((double)(maxX - minX) / 3);
-                pos = rand.Next(minX + diff, maxX - diff);
-                int ctr = 0;
-                while (pos == hole && ctr < 10)
-                {
-                    pos = rand.Next(minX + diff, maxX - diff);
-                    ctr++;
-                }
-                new_hole = rand.Next(minY, maxY);
-                for (int i = minY; i <= maxY; i++)
-                {
-                    if (i == new_hole)
-                    {
-                        if (Cost) Field[pos, new_hole] = 2;
-                    }
-                    else Field[pos, i] = 1;
-                }
-                Rooms(minX, minY, pos - 1, maxY, depth - 1, new_hole, !vertical, ref rand);
-                Rooms(pos + 1, minY, maxX, maxY, depth - 1, new_hole, !vertical, ref rand);
-            }
-        }
-
+        // A function performing the Random DFS algorithm as described above.
         private void RandomDFS(Cell current, ref bool[,] closedSet, ref Random rand)
         {
             closedSet[current.X, current.Y] = true;

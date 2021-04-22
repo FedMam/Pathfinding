@@ -23,11 +23,9 @@ namespace Pathfinding
         Dictionary<Cell, Cell> Previous = new Dictionary<Cell, Cell>();
         Dictionary<Cell, int> TotalCost = new Dictionary<Cell, int>();
         bool resourcesLoaded = true;
+        Bitmap startPoint = (Bitmap)Properties.Resources.startpoint.Clone();
+        Bitmap endPoint = (Bitmap)Properties.Resources.endpoint.Clone();
         Color pathColor;
-        // Empty, Wall, High Cost, Path, Closed Set, Open Set
-        Color[,] themes = { { Color.White, Color.DarkGray, Color.LightGreen, Color.LightGray, Color.Yellow, Color.Red }};
-        // Wall, High Cost, Start, End
-        Bitmap[] themeImages = { Properties.Resources.startpoint, Properties.Resources.endpoint };
 
         public Form1()
         {
@@ -42,21 +40,23 @@ namespace Pathfinding
             xSize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Width - 250) / 16 / 10 * 10, 150);
             ySize.Maximum = Math.Min((Screen.PrimaryScreen.Bounds.Height - 30) / 16 / 10 * 10, 120);
             string directory = Path.Combine(Directory.Replace(@"\bin\Debug", ""), "Resources");
-            foreach (Bitmap image in themeImages)
-            {
-                if (image != null) image.MakeTransparent(Color.White);
-            }
             Random rand = new Random();
             rand.Next();
             pathColor = (new Color[] { Color.LightGray, Color.Gold, Color.MediumAquamarine, Color.LightSkyBlue, Color.SteelBlue })[rand.Next(5)];
+            startPoint.MakeTransparent(Color.White);
+            endPoint.MakeTransparent(Color.White);
             Invalidate();
         }
 
+        // Size of the map in cells
         public int XSize { get { return (int)xSize.Value; } }
         public int YSize { get { return (int)ySize.Value; } }
+
+        // These properties descript higher cost cells
         public bool HigherCost { get { return costCB.Checked; } }
         public int Cost { get { return (int)cost.Value; } }
 
+        // The main function of the program, which is the pathfinding function. Performs one cycle of the algorithm.
         void Search()
         {
             Cell current = new Cell();
@@ -111,15 +111,26 @@ namespace Pathfinding
                     {
                         case Algorithm.BFS:
                         case Algorithm.DFS:
+                            // DFS. All it does is checking if there is a path or not.
+                            // BFS. It finds paths with a minimum of cells visited.
                             OpenSet.Add(next, newCost);
                             break;
                         case Algorithm.Dijkstra:
+                            // Dijkstra's algorithm. It finds paths with minimal cost.
                             OpenSet.Add(next, newCost);
                             break;
                         case Algorithm.BestFirst:
+                            // Greedy Best-First Search.
                             OpenSet.Add(next, Heuristic(next));
                             break;
                         case Algorithm.AStar:
+                            // A* Search (it uses both the heuristic and total cost of the path).
+                            //
+                            // We multiply the cost and the heuristic by 100
+                            // to create Manhattan distance that prefers straight paths.
+                            // This is just an aesthetic optimisation,
+                            // it finds optimal paths anyway.
+                            // See the Heuristic() function for more information.
                             OpenSet.Add(next, newCost * 100 + Heuristic(next));
                             break;
                     }
@@ -131,7 +142,7 @@ namespace Pathfinding
         {
             // Euclidean distance
             if (heuristic2.Checked) return (int)(Math.Sqrt((cell.X - endX) * (cell.X - endX) + (cell.Y - endY) * (cell.Y - endY)) * 100);
-            // Manhattan distance that prefers diagonal moves
+            // Manhattan distance that prefers straight paths.
             if (!diagCB.Checked) return (Math.Abs(cell.X - endX) + Math.Abs(cell.Y - endY)) * 100 + Math.Abs(Math.Abs(cell.X - endX) - Math.Abs(cell.Y - endY));
             // Diagonal distance
             return Math.Max(Math.Abs(cell.X - endX), Math.Abs(cell.Y - endY)) * 100;
@@ -139,6 +150,7 @@ namespace Pathfinding
 
         int Graph(Cell cell) => field[cell.X, cell.Y];
 
+        // A function that gets all neighbours of a cell.
         Cell[] Neighbours(Cell cell)
         {
             List<Cell> res = new List<Cell>();
@@ -230,6 +242,7 @@ namespace Pathfinding
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
+            // Here we draw everything on the screen.
             for (int i = 0; i < XSize; i++)
             {
                 for (int j = 0; j < YSize; j++)
@@ -260,16 +273,8 @@ namespace Pathfinding
                 e.Graphics.DrawLine(new Pen(pathColor, 3), 150 + path[i].X * 16 + 7, path[i].Y * 16 + 7, 150 + path[i - 1].X * 16 + 7, path[i - 1].Y * 16 + 7);
             }
             if (path.Count > 0) e.Graphics.DrawLine(new Pen(pathColor, 3), 150 + path[0].X * 16 + 7, path[0].Y * 16 + 7, 150 + endX * 16 + 7, endY * 16 + 7);
-            if (!resourcesLoaded)
-            {
-                e.Graphics.FillEllipse(Brushes.Blue, new Rectangle(new Point(150 + endX * 16, endY * 16), new Size(16, 16)));
-                e.Graphics.FillEllipse(Brushes.Red, new Rectangle(new Point(150 + startX * 16 + 2, startY * 16 + 2), new Size(12, 12)));
-            }
-            else
-            {
-                e.Graphics.DrawImage(themeImages[0], new Point(150 + startX * 16, startY * 16));
-                e.Graphics.DrawImage(themeImages[1], new Point(150 + endX * 16, endY * 16));
-            }
+            e.Graphics.DrawImage(startPoint, new Point(150 + startX * 16, startY * 16));
+            e.Graphics.DrawImage(endPoint, new Point(150 + endX * 16, endY * 16));
         }
 
         private void dfsRB_CheckedChanged(object sender, EventArgs e)
@@ -307,6 +312,8 @@ namespace Pathfinding
             if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
+        // Running the search algorithm if we want to see the process.
+        // If we don't, then the search algorithm runs automatically every time we change the map.
         private void runButton_Click(object sender, EventArgs e)
         {
             if (running) { Reenable(); timer.Stop(); return; }
@@ -458,6 +465,7 @@ namespace Pathfinding
             Invalidate();
         }
 
+        // Saves a map to a file.
         private void saveB_Click(object sender, EventArgs e)
         {
             SaveFileDialog sfd = new SaveFileDialog();
@@ -497,8 +505,10 @@ namespace Pathfinding
             }
         }
 
+        // Gets the directory of the program.
         string Directory { get { return Environment.GetCommandLineArgs()[0].Replace(Path.GetFileName(Environment.GetCommandLineArgs()[0]), ""); } }
-        
+
+        // Loads a map from a file.
         private void loadB_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -545,6 +555,8 @@ namespace Pathfinding
             if (!showCB.Checked) runButton_Click(null, new EventArgs());
         }
 
+        // Shows a form where we can generate a random map.
+        // See GenerateForm.cs for more information.
         private void generateB_Click(object sender, EventArgs e)
         {
             if (!showCB.Checked) runButton_Click(null, new EventArgs());
