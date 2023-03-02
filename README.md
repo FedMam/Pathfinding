@@ -28,3 +28,5 @@ C# - Visual Studio 2019 - Windows Forms
 ### Развертка программы
 Открыть решение .../Pathfinding/Pathfinding.sln в Visual Studio 2019 и скомпилировать.
 Запустить приложение .../Pathfinding/Pathfinding/bin/Debug/Pathfinding.exe
+
+Идея программы взята из: https://www.redblobgames.com/pathfinding/a-star/introduction.html
